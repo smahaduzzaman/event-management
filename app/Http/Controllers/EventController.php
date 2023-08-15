@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
@@ -10,12 +12,33 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get all events
-        $events = Event::all();
+        $query = Event::query();
 
-        return view('dashboard.events.events', compact('events'));
+        // Search by title
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'like', "%$search%");
+        }
+
+        // Filter by category
+        if ($request->has('category')) {
+            $category = $request->input('category');
+            $query->where('category_id', $category);
+        }
+
+        // Sort by date
+        if ($request->has('sort')) {
+            $sort = $request->input('sort');
+            $query->orderBy('date', $sort);
+        }
+
+        $events = $query->paginate(5);
+
+        $categories = Category::all();
+
+        return view('dashboard.events.events', compact('events', 'categories'));
     }
 
     /**
@@ -57,7 +80,6 @@ class EventController extends Controller
         $event->save();
 
         return redirect()->route('dashboard.events.events')->with('success', 'Event created successfully.');
-
     }
 
     /**
@@ -120,5 +142,36 @@ class EventController extends Controller
         $event->delete();
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+    }
+
+    public function storeComment(Request $request, Event $event)
+    {
+        $validatedData = $request->validate([
+            'content' => 'required',
+        ]);
+
+        $comment = new Comment();
+        $comment->content = $validatedData['content'];
+        $comment->user_id = auth()->user()->id; // Assuming authenticated user is commenting
+        $comment->event_id = $event->id;
+        $comment->save();
+
+        return redirect()->back()->with('success', 'Comment added successfully.');
+    }
+
+    public function deleteComment(Comment $comment)
+    {
+        // Make sure the authenticated user is the owner of the comment
+        if ($comment->user_id == auth()->user()->id) {
+            $comment->delete();
+            return redirect()->back()->with('success', 'Comment deleted successfully.');
+        } else {
+            return redirect()->back()->with('error', 'You do not have permission to delete this comment.');
+        }
+    }
+    public function showComments(Comment $comment)
+    {
+        $comments = Comment::all();
+        return view('dashboard.comments.index', compact('comments'));
     }
 }
