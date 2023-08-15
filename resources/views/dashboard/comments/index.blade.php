@@ -1,10 +1,12 @@
 @extends('dashboard.dashboard')
 @section('content')
     <h1 class="text-2xl font-semibold mb-4">Comments</h1>
-    <form action="{{ route('comments.index') }}" method="get">
+    <?php //$event = App\Models\Event::find(1); ?>
+    {{-- <form action="{{ route('comments.store', $event->id) }}" method="POST">
+        @csrf
         <input type="text" name="search" placeholder="Search by name">
         <button type="submit">Search</button>
-    </form>
+    </form> --}}
 
     @foreach ($comments as $comment)
         <div class="bg-white p-6 rounded-lg shadow-md">

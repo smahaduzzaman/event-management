@@ -31,8 +31,10 @@
                     <a href="{{ route('events.create') }}"
                         class="block py-2.5 px-4 rounded transition duration-200 hover:bg-blue-700">Create Event</a>
                 </li>
+                <?php $event = App\Models\Event::find(1); ?>
                 <li>
-                    <a href="{{ route('comments.index') }}"
+                    <a href="{{ route('comments.index', $event->id)
+                    }}"
                         class="block py-2.5 px-4 rounded transition duration-200 hover:bg-blue-700">Comments</a>
                 </li>
                 <li>

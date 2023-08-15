@@ -11,20 +11,19 @@
             <p class="text-gray-600 mb-2 font-semibold">{{ $event->location }}</p>
             <p class="text-gray-600">{{ $event->description }}</p>
         </div>
-        @php
-            $comment = App\Models\Comment::find(1);
-        @endphp
-        <div class="bg-gray-100 p-2 mb-2">
-            <p>{{ $comment->content }}</p>
-            <p class="text-gray-600">By: {{ $comment->user->name }}</p>
-            @if ($comment->user_id == auth()->user()->id)
-                <form action="{{ route('comments.destroy', $comment->id) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-500 hover:underline">Delete</button>
-                </form>
-            @endif
-        </div>
+        @foreach ($comments as $comment)
+            <div class="bg-gray-100 p-2 mb-2">
+                <p>{{ $comment->content }}</p>
+                <p class="text-gray-600">By: {{ $comment->user->name }}</p>
+                @if ($comment->user_id == auth()->user()->id)
+                    <form action="{{ route('comments.destroy', $comment->id) }}" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                    </form>
+                @endif
+            </div>
+        @endforeach
 
     <form action="{{ route('comments.store', $event->id) }}" method="POST">
         @csrf
@@ -34,6 +33,4 @@
         type="submit">Submit Comment</button>
     </form>
 
-
-    </div>
-@endsection
+  @endsection

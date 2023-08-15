@@ -5,62 +5,44 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Comment;
+use Illuminate\Support\Facades\Auth;
+
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index($eventId)
     {
-        $comments = Comment::all();
-        return view('dashboard.comments.comments', compact('comments'));
+        $comments = Comment::where('event_id', $eventId)->get();
+        return view('dashboard.comments.index', compact('comments', 'eventId'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(Request $request, $eventId)
     {
-        //
+        $validatedData = $request->validate([
+            'content' => 'required',
+        ]);
+
+        $comment = new Comment();
+        $comment->content = $validatedData['content'];
+        $comment->user_id = Auth::user()->id;
+        $comment->event_id = $eventId;
+        $comment->save();
+
+        return redirect()->route('events.show', $eventId)->with('success', 'Comment added successfully.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function destroy($commentId)
     {
-        //
-    }
+        $comment = Comment::findOrFail($commentId);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Comment $comment)
-    {
-        //
+        if ($comment->user_id == Auth::user()->id) {
+            $comment->delete();
+            return redirect()->back()->with('success', 'Comment deleted successfully.');
+        } else {
+            return redirect()->back()->with('error', 'You do not have permission to delete this comment.');
+        }
     }
 }

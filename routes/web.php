@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,10 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::patch('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+});
 
-    Route::get('/comments', [EventController::class, 'showComments'])->name('comments.index');
-    Route::post('/events/{event}/comments', [EventController::class, 'storeComment'])->name('events.comments.store');
-    Route::delete('/comments/{comment}', [EventController::class, 'deleteComment'])->name('comments.destroy');
+// Comments Route
+Route::middleware('auth')->group(function () {
+    Route::get('/events/{event}/comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('/events/{event}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::get('/comments/{comment}', [CommentController::class, 'show'])->name('comments.show');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 Route::middleware('auth')->group(function () {

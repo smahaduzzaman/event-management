@@ -143,35 +143,4 @@ class EventController extends Controller
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
     }
-
-    public function storeComment(Request $request, Event $event)
-    {
-        $validatedData = $request->validate([
-            'content' => 'required',
-        ]);
-
-        $comment = new Comment();
-        $comment->content = $validatedData['content'];
-        $comment->user_id = auth()->user()->id; // Assuming authenticated user is commenting
-        $comment->event_id = $event->id;
-        $comment->save();
-
-        return redirect()->back()->with('success', 'Comment added successfully.');
-    }
-
-    public function deleteComment(Comment $comment)
-    {
-        // Make sure the authenticated user is the owner of the comment
-        if ($comment->user_id == auth()->user()->id) {
-            $comment->delete();
-            return redirect()->back()->with('success', 'Comment deleted successfully.');
-        } else {
-            return redirect()->back()->with('error', 'You do not have permission to delete this comment.');
-        }
-    }
-    public function showComments(Comment $comment)
-    {
-        $comments = Comment::all();
-        return view('dashboard.comments.index', compact('comments'));
-    }
 }
